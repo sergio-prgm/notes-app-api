@@ -241,18 +241,23 @@ const AApp = () => {
   }
    
   const [selected, setSelected] = useState(0)
-  const [votes, setVotes] = useState([0, 0, 0, 0, 0, 0, 0])
+  const [votes, setVotes] = useState(new Array(7))
 
   const handleVote = () => {
     let copy = [...votes]
     const selectedCopy = copy[selected]
     !!selectedCopy || selectedCopy === 0
-      ? copy[selected] = copy[selected] + 1
-      : copy[selected] = 0
+    ? copy[selected] = copy[selected] + 1
+    : copy[selected] = 1
     setVotes(copy)
-    console.log(copy)
   }
 
+  const AltMsg = () => {return <p>Not enough data</p>}
+
+  const MostVoted = () => {
+    const filtered = votes.filter(item => typeof(item) === 'number')
+    return <p>{anecdotes[votes.indexOf(Math.max(...filtered))]  }</p>
+  }
 
   return (
     <>
@@ -260,8 +265,10 @@ const AApp = () => {
       <button onClick={randomize} >Random quote</button>
       <button onClick={handleVote} >Vote quote</button>
       <strong>Anecdote with most votes:</strong>
-      <p>{ anecdotes[votes.indexOf(Math.max(...votes))] }
-      </p>
+      {votes.some(item => typeof(item) === 'number')
+        ? <MostVoted />
+        : <AltMsg />
+      }
     </>
   )
 }
