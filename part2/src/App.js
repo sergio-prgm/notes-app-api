@@ -1,5 +1,7 @@
-import {Note} from "./Note";
-import { useState, useEffect } from "react";
+import {Note} from "./Note"
+import { useState, useEffect } from "react"
+import { getAllNotes } from "./services/notes/getAllNotes"
+import { createNote } from "./services/notes/createNote"
 
 // Buena práctica => evitar que las props puedan tener tipos de datos distintos
 
@@ -18,6 +20,7 @@ function App(props) {
   const [notes, setNotes] = useState([])
   const [newNote, setNewNote] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (event) => {
     setNewNote(event.target.value)
@@ -26,14 +29,11 @@ function App(props) {
   useEffect(() => {
     console.log('useEffect')
     setLoading(true)
-    setTimeout(() => {
-      fetch('https://jsonplaceholder.typicode.com/posts')
-      .then((response) => response.json())
-      .then((json) => {
-        setNotes(json)
+    getAllNotes()
+      .then(notes => {
+        setNotes(notes)
         setLoading(false)
       })
-    }, 2000)
   }, [])
   // si no se pasan dependencias [] al efecto se ejecuta cada vez que se actualiza un estado del compoennte
   // si se pasa un [] solo se ejecuta al renderizarse por primera vez.
@@ -47,12 +47,20 @@ function App(props) {
   const handleSubmit = (event) => {
     event.preventDefault()
     const noteToState = {
-      id: notes.length + 1,
       title: newNote,
       body: newNote,
+      userId: 1,
     }
-    console.log(noteToState)
-    setNotes(notes.concat(noteToState))
+
+    createNote(noteToState)
+      .then(newNote => {
+        setNotes((prevNotes) => prevNotes.concat(newNote))
+      })
+      .catch(err => {
+        console.error(err)
+        setError('Ha habido un error en la API...')
+      })
+    // setNotes(notes.concat(noteToState))
     // setNotes([...notes, noteToState])
     setNewNote('')
   }
@@ -70,6 +78,7 @@ function App(props) {
         <input onChange={handleChange} type='text' value={newNote}></input>
         <button>Crear nota</button>
       </form>
+      {error ? <span>{error}</span> : ''}
     </div>
   )
 }
