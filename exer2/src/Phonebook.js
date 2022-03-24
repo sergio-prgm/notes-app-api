@@ -1,9 +1,23 @@
 import { useEffect, useState } from "react"
-import { getData } from "./services/getData"
+import { getPersons } from "./services/getPersons"
+import { createPerson } from "./services/createPerson"
+import { deletePerson } from "./services/deletePerson"
 
-const Persons = ({persons}) => {
-  const print = persons.map(person => <p key={person.number}>{person.name} {person.number}</p>)
-  return <>{print}</>
+const Persons = (props) => {
+  const { persons, setPersons } = props
+  const print = persons.map((person) => {
+    const newProps = [person, setPersons]
+    return <li key={person.number}>{person.name} {person.number}
+      <button onClick={() => handleDelete(newProps)} >delete</button>
+    </li>
+  })
+  return <ul>{print}</ul>
+}
+
+const handleDelete = ([person, setPersons]) => {
+  console.log(person)
+  deletePerson(person.id)
+  setPersons(prevPersons => prevPersons.filter(dperson => dperson.id !== person.id ) )
 }
 
 const Filter = (props) => {
@@ -37,6 +51,8 @@ const PersonForm = (props) => {
       name: newPerson.name,
       number: newPerson.number
     }
+
+    createPerson(personToState)
 
     if (checkName(newPerson.name)) {
       alert(`${newPerson.name} is already added to the phonebook`)
@@ -80,23 +96,23 @@ const PersonForm = (props) => {
 }
 
 export const PhoneBook = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas',
-    number: '33-44-5656' },
-    { name: 'Arturito Fantástico',
-    number: '35-88-7434' },
-    { name: 'Dan Abramov',
-    number: '12-43-234345'},
-    { name: 'Mary Poppendieck',
-    number: '39-23-6423122' }
-  ]) 
-  const [fromAxios, setAxios] = useState([])
+  // const [persons, setPersons] = useState([
+  //   { name: 'Arto Hellas',
+  //   number: '33-44-5656' },
+  //   { name: 'Arturito Fantástico',
+  //   number: '35-88-7434' },
+  //   { name: 'Dan Abramov',
+  //   number: '12-43-234345'},
+  //   { name: 'Mary Poppendieck',
+  //   number: '39-23-6423122' }
+  // ]) 
+  const [persons, setPersons] = useState([])
   const [filterPersons, setFilterPersons] = useState([])
   const [newPerson, setNewPerson] = useState({})
   
   useEffect(() => {
-    getData()
-      .then(persons => setAxios(persons))
+    getPersons()
+      .then(persons => setPersons(persons))
   }, [])
 
 
@@ -108,8 +124,8 @@ export const PhoneBook = () => {
       <PersonForm persons={persons} setPersons={setPersons} newPerson={newPerson} setNewPerson={setNewPerson} />
       <h2>Numbers</h2>
       { filterPersons.length > 0
-        ? <Persons persons={filterPersons} />
-        : <Persons persons={fromAxios} /> 
+        ? <Persons persons={filterPersons} setPersons={setPersons} />
+        : <Persons persons={persons} setPersons={setPersons} /> 
       }
     </div>
   )
