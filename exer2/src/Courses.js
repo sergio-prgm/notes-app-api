@@ -5,7 +5,7 @@ const Header = ({course}) => {
 }
 
 const Content = ({part}) => {
-  const print = part.map(item => <p>{item.name} {item.exercises}</p>)
+  const print = part.map(item => <p key={item.name}>{item.name} {item.exercises}</p>)
   return <>{print}</>
 }
 
