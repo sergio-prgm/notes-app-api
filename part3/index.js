@@ -1,6 +1,12 @@
 const express = require('express')
+const logger = require('./loggerMiddleware')
 const app = express()
+const cors = require('cors')
+
+app.use(cors())
 app.use(express.json())
+
+app.use(logger)
 
 let notes = [
   {
@@ -23,10 +29,6 @@ let notes = [
   }
 ]
 
-// const app = http.createServer((request, response) => {
-//   response.writeHead(200, { 'Content-Type': 'application/json' })
-//   response.end(JSON.stringify(notes))
-// })
 app.get('/', (request, response) => {
   response.send('<h1>hello world</h1>')
 })
@@ -75,6 +77,15 @@ app.post('/api/notes', (request, response) => {
   notes = [...notes, newNote]
 
   response.status(201).json(newNote)
+})
+
+//  Middleware evalúa de arriba a abajo
+//  Puede ser util para notificar de un error en la ruta
+
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not found'
+  })
 })
 
 const PORT = 3001
